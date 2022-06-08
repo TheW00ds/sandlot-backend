@@ -1,0 +1,32 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 
+  'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}', 
+  '.' ]
+  env: 
+    - 'IMAGE_NAME=${_IMAGE_NAME}'
+
+- name: node
+  entrypoint: npm
+  args: ['run','create:env']
+  env:
+    - 'DATABASE_URL=${_DATABASE_URL}'
+
+- name: node
+  entrypoint: npx
+  args: ['prisma','migrate','deploy']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}:latest']
+  env: 
+    - 'IMAGE_NAME=${_IMAGE_NAME}'
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  args: [gcloud,'run','services','update','nestjs-starter',
+  '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}:latest',
+  '--region=us-east4']
+  env: 
+    - 'IMAGE_NAME=${_IMAGE_NAME}'
+
+timeout: "1600s"
+
