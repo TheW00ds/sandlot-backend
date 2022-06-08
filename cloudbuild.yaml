@@ -3,8 +3,6 @@ steps:
   args: [ 'build', '-t', 
   'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${SERVICE_NAME}', 
   '.' ]
-  env: 
-    - 'SERVICE_NAME=${_SERVICE_NAME}'
 
 - name: node
   entrypoint: npm
@@ -18,15 +16,11 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${SERVICE_NAME}:latest']
-  env: 
-    - 'SERVICE_NAME=${_SERVICE_NAME}'
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
   args: [gcloud,'run','services','update','nestjs-starter',
   '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${SERVICE_NAME}:latest',
   '--region=us-east4']
-  env: 
-    - 'SERVICE_NAME=${_SERVICE_NAME}'
 
 timeout: "1600s"
 
