@@ -1,10 +1,10 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 
-  'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}', 
+  'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE}', 
   '.' ]
   env: 
-    - 'IMAGE_NAME=${_IMAGE_NAME}'
+    - 'IMAGE=${_IMAGE}'
 
 - name: node
   entrypoint: npm
@@ -17,16 +17,16 @@ steps:
   args: ['prisma','migrate','deploy']
 
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}:latest']
+  args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE}:latest']
   env: 
-    - 'IMAGE_NAME=${_IMAGE_NAME}'
+    - 'IMAGE=${_IMAGE}'
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
   args: [gcloud,'run','services','update','nestjs-starter',
-  '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE_NAME}:latest',
+  '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/docker-images/${IMAGE}:latest',
   '--region=us-east4']
   env: 
-    - 'IMAGE_NAME=${_IMAGE_NAME}'
+    - 'IMAGE=${_IMAGE}'
 
 timeout: "1600s"
 
