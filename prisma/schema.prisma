@@ -16,7 +16,7 @@ model User {
   email            String            @unique
   password         String
   userName         String
-  persona          Persona?
+  personas         Persona[]
   addresses        Address[]
   groupMemberships GroupMembership[]
   eventCommitments EventCommitment[]
@@ -24,13 +24,12 @@ model User {
 }
 
 model Persona {
-  id        String @id @default(uuid())
+  id        String  @id @default(uuid())
   firstName String
   lastName  String
-  bio       String
-  User      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String @unique
-
+  bio       String?
+  User      User?   @relation(fields: [userId], references: [id])
+  userId    String?
 }
 
 model Address {
@@ -62,9 +61,9 @@ model GroupMembership {
   id      String                @id @default(uuid())
   role    GroupMembershipRole   @default(MEMBER)
   status  GroupMembershipStatus @default(PENDING)
-  group   Group                 @relation(fields: [groupId], references: [id], onUpdate: Cascade)
-  groupId String
-  User    User?                 @relation(fields: [userId], references: [id])
+  group   Group?                @relation(fields: [groupId], references: [id])
+  groupId String?
+  user    User?                 @relation(fields: [userId], references: [id])
   userId  String?
 }
 
@@ -113,10 +112,6 @@ model EventAvailableDate {
 
 model EventCommitment {
   id                  String               @id @default(uuid())
-  event               Event                @relation(fields: [eventId], references: [id])
-  eventId             String
-  user                User                 @relation(fields: [userId], references: [id])
-  userId              String
   going               Boolean              @default(false)
   participating       Boolean              @default(false)
   availableEventDates EventAvailableDate[]
@@ -124,6 +119,10 @@ model EventCommitment {
   rideId              String?              @unique
   rideRequest         RideRequest?         @relation(fields: [rideRequestId], references: [id])
   rideRequestId       String?              @unique
+  User                User?                @relation(fields: [userId], references: [id])
+  userId              String?
+  Event               Event?               @relation(fields: [eventId], references: [id])
+  eventId             String?
 }
 
 enum EventStatus {
@@ -144,19 +143,21 @@ model Place {
 
 model Ride {
   id              String           @id @default(uuid())
-  Event           Event            @relation(fields: [eventId], references: [id])
-  eventId         String
   eventCommitment EventCommitment?
   seats           Int?
   storageSpace    Boolean          @default(true)
   description     String?          @default("No description")
   destination     Place?           @relation(fields: [placeId], references: [id])
   placeId         String?
+  Event           Event?           @relation(fields: [eventId], references: [id])
+  eventId         String?
 }
 
 model RideRequest {
   id                String           @id @default(uuid())
-  Event             Event            @relation(fields: [eventId], references: [id])
-  eventId           String
   eventCommitmentId EventCommitment?
+  Event             Event?           @relation(fields: [eventId], references: [id])
+  eventId           String?
+  seats             Int?
+  storageSpace      Boolean          @default(false)
 }
