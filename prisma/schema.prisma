@@ -11,12 +11,12 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(cuid())
+  id               String            @id @default(uuid())
   active           Boolean           @default(true)
   email            String            @unique
   password         String
   userName         String
-  persona          Persona?
+  personas         Persona[]
   addresses        Address[]
   groupMemberships GroupMembership[]
   eventCommitments EventCommitment[]
@@ -24,17 +24,16 @@ model User {
 }
 
 model Persona {
-  id        String @id @default(cuid())
+  id        String  @id @default(uuid())
   firstName String
   lastName  String
-  bio       String
-  User      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String @unique
-
+  bio       String?
+  User      User?   @relation(fields: [userId], references: [id])
+  userId    String?
 }
 
 model Address {
-  id      String  @id @default(cuid())
+  id      String  @id @default(uuid())
   name    String
   street  String
   city    String
@@ -48,7 +47,7 @@ model Address {
 }
 
 model Group {
-  id            String            @id @default(cuid())
+  id            String            @id @default(uuid())
   name          String            @unique
   description   String?
   groupMember   GroupMembership[]
@@ -59,12 +58,12 @@ model Group {
 }
 
 model GroupMembership {
-  id      String                @id @default(cuid())
+  id      String                @id @default(uuid())
   role    GroupMembershipRole   @default(MEMBER)
   status  GroupMembershipStatus @default(PENDING)
-  group   Group                 @relation(fields: [groupId], references: [id], onUpdate: Cascade)
-  groupId String
-  User    User?                 @relation(fields: [userId], references: [id])
+  group   Group?                @relation(fields: [groupId], references: [id])
+  groupId String?
+  user    User?                 @relation(fields: [userId], references: [id])
   userId  String?
 }
 
@@ -80,7 +79,7 @@ enum GroupMembershipStatus {
 }
 
 model Event {
-  id                  String               @id @default(cuid())
+  id                  String               @id @default(uuid())
   name                String
   description         String?
   status              EventStatus          @default(PLANNING)
@@ -96,14 +95,14 @@ model Event {
   originatingGroupId  String?
   User                User?                @relation(fields: [userId], references: [id])
   userId              String?
-  availableEventDates AvailableEventDate[]
+  availableEventDates EventAvailableDate[]
   eventCommitments    EventCommitment[]
   rides               Ride[]
   rideRequests        RideRequest[]
 }
 
-model AvailableEventDate {
-  id                String           @id @default(cuid())
+model EventAvailableDate {
+  id                String           @id @default(uuid())
   Event             Event?           @relation(fields: [eventId], references: [id])
   eventId           String?
   eventCommitment   EventCommitment? @relation(fields: [eventCommitmentId], references: [id])
@@ -112,18 +111,18 @@ model AvailableEventDate {
 }
 
 model EventCommitment {
-  id                  String               @id @default(cuid())
-  event               Event                @relation(fields: [eventId], references: [id])
-  eventId             String
-  user                User                 @relation(fields: [userId], references: [id])
-  userId              String
+  id                  String               @id @default(uuid())
   going               Boolean              @default(false)
   participating       Boolean              @default(false)
-  availableEventDates AvailableEventDate[]
+  availableEventDates EventAvailableDate[]
   ride                Ride?                @relation(fields: [rideId], references: [id])
   rideId              String?              @unique
   rideRequest         RideRequest?         @relation(fields: [rideRequestId], references: [id])
   rideRequestId       String?              @unique
+  User                User?                @relation(fields: [userId], references: [id])
+  userId              String?
+  Event               Event?               @relation(fields: [eventId], references: [id])
+  eventId             String?
 }
 
 enum EventStatus {
@@ -134,7 +133,7 @@ enum EventStatus {
 }
 
 model Place {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
   address     Address?
@@ -143,20 +142,22 @@ model Place {
 }
 
 model Ride {
-  id              String           @id @default(cuid())
-  Event           Event            @relation(fields: [eventId], references: [id])
-  eventId         String
+  id              String           @id @default(uuid())
   eventCommitment EventCommitment?
   seats           Int?
   storageSpace    Boolean          @default(true)
   description     String?          @default("No description")
   destination     Place?           @relation(fields: [placeId], references: [id])
   placeId         String?
+  Event           Event?           @relation(fields: [eventId], references: [id])
+  eventId         String?
 }
 
 model RideRequest {
-  id                String           @id @default(cuid())
-  Event             Event            @relation(fields: [eventId], references: [id])
-  eventId           String
+  id                String           @id @default(uuid())
   eventCommitmentId EventCommitment?
+  Event             Event?           @relation(fields: [eventId], references: [id])
+  eventId           String?
+  seats             Int?
+  storageSpace      Boolean          @default(false)
 }
