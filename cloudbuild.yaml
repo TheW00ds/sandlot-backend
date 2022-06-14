@@ -18,7 +18,7 @@ steps:
   args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}:latest']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-  args: [gcloud,'run','services','update','nestjs-starter',
+  args: [gcloud,'run','deploy','sandlot-backend',
   '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}:latest',
   '--region=us-east4']
 
