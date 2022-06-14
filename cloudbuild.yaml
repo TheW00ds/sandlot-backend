@@ -1,14 +1,14 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 
-  'us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}', 
-  '.' ]
-
 - name: node
   entrypoint: npm
   args: ['run','create:env']
   env:
     - 'DATABASE_URL=${_DATABASE_URL}'
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 
+  'us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}', 
+  '.' ]
 
 - name: node
   entrypoint: npx
@@ -18,7 +18,7 @@ steps:
   args: [ 'push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}:latest']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-  args: [gcloud,'run','services','update','nestjs-starter',
+  args: [gcloud,'run','services','update','sandlot-backend',
   '--image=us-east4-docker.pkg.dev/${PROJECT_ID}/imgs/${_SERVICE_NAME}:latest',
   '--region=us-east4']
 
