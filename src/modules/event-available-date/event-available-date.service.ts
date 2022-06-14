@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
-import { Ride, Prisma } from '@prisma/client';
+import { EventAvailableDate, Prisma } from '@prisma/client';
 
 @Injectable()
-export class RideService {
+export class EventAvailableDateService {
   constructor(private prisma: PrismaService) {}
 }
