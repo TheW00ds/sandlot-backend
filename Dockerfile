@@ -14,13 +14,12 @@ RUN npm run build
 
 FROM node:18-alpine AS prod
 
-ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY . .
 
