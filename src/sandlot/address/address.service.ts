@@ -16,14 +16,16 @@ export class AddressService {
     cursor?: Prisma.AddressWhereUniqueInput;
     where?: Prisma.AddressWhereInput;
     orderBy?: Prisma.AddressOrderByWithRelationInput;
+    include?: Prisma.AddressInclude;
   }): Promise<Address[]> {
-    const { skip, take, cursor, where, orderBy } = params;
+    const { skip, take, cursor, where, orderBy, include } = params;
     return this.prisma.address.findMany({
       skip,
       take,
       cursor,
       where,
       orderBy,
+      include,
     });
   }
 

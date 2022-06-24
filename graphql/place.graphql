@@ -1,0 +1,12 @@
+type Place {
+  id: String!
+  name: String
+  description: String
+  address: Address
+}
+
+input PlaceInput {
+  name: String
+  description: String
+  address: AddressInput
+}
