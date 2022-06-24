@@ -1,0 +1,14 @@
+type Persona {
+  id: String!
+  firstName: String
+  lastName: String
+  bio: String
+  user: User
+}
+
+input PersonaInput {
+  firstName: String
+  lastName: String
+  bio: String
+  user: UserCreateInput
+}

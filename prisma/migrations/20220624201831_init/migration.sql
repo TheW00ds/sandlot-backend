@@ -12,8 +12,7 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "userName" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -23,8 +22,8 @@ CREATE TABLE "Persona" (
     "id" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "bio" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "bio" TEXT,
+    "userId" TEXT,
 
     CONSTRAINT "Persona_pkey" PRIMARY KEY ("id")
 );
@@ -59,7 +58,7 @@ CREATE TABLE "GroupMembership" (
     "id" TEXT NOT NULL,
     "role" "GroupMembershipRole" NOT NULL DEFAULT E'MEMBER',
     "status" "GroupMembershipStatus" NOT NULL DEFAULT E'PENDING',
-    "groupId" TEXT NOT NULL,
+    "groupId" TEXT,
     "userId" TEXT,
 
     CONSTRAINT "GroupMembership_pkey" PRIMARY KEY ("id")
@@ -85,24 +84,24 @@ CREATE TABLE "Event" (
 );
 
 -- CreateTable
-CREATE TABLE "AvailableEventDate" (
+CREATE TABLE "EventAvailableDate" (
     "id" TEXT NOT NULL,
     "eventId" TEXT,
     "eventCommitmentId" TEXT,
     "date" TIMESTAMP(3),
 
-    CONSTRAINT "AvailableEventDate_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "EventAvailableDate_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "EventCommitment" (
     "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
     "going" BOOLEAN NOT NULL DEFAULT false,
     "participating" BOOLEAN NOT NULL DEFAULT false,
     "rideId" TEXT,
     "rideRequestId" TEXT,
+    "userId" TEXT,
+    "eventId" TEXT,
 
     CONSTRAINT "EventCommitment_pkey" PRIMARY KEY ("id")
 );
@@ -119,11 +118,11 @@ CREATE TABLE "Place" (
 -- CreateTable
 CREATE TABLE "Ride" (
     "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
     "seats" INTEGER,
     "storageSpace" BOOLEAN NOT NULL DEFAULT true,
     "description" TEXT DEFAULT E'No description',
     "placeId" TEXT,
+    "eventId" TEXT,
 
     CONSTRAINT "Ride_pkey" PRIMARY KEY ("id")
 );
@@ -131,16 +130,15 @@ CREATE TABLE "Ride" (
 -- CreateTable
 CREATE TABLE "RideRequest" (
     "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
+    "eventId" TEXT,
+    "seats" INTEGER,
+    "storageSpace" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "RideRequest_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Persona_userId_key" ON "Persona"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Address_placeId_key" ON "Address"("placeId");
@@ -155,7 +153,7 @@ CREATE UNIQUE INDEX "EventCommitment_rideId_key" ON "EventCommitment"("rideId");
 CREATE UNIQUE INDEX "EventCommitment_rideRequestId_key" ON "EventCommitment"("rideRequestId");
 
 -- AddForeignKey
-ALTER TABLE "Persona" ADD CONSTRAINT "Persona_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Persona" ADD CONSTRAINT "Persona_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Address" ADD CONSTRAINT "Address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -170,7 +168,7 @@ ALTER TABLE "Group" ADD CONSTRAINT "Group_parentId_fkey" FOREIGN KEY ("parentId"
 ALTER TABLE "GroupMembership" ADD CONSTRAINT "GroupMembership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GroupMembership" ADD CONSTRAINT "GroupMembership_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "GroupMembership" ADD CONSTRAINT "GroupMembership_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -182,16 +180,16 @@ ALTER TABLE "Event" ADD CONSTRAINT "Event_originatingGroupId_fkey" FOREIGN KEY (
 ALTER TABLE "Event" ADD CONSTRAINT "Event_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "Place"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AvailableEventDate" ADD CONSTRAINT "AvailableEventDate_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "EventAvailableDate" ADD CONSTRAINT "EventAvailableDate_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AvailableEventDate" ADD CONSTRAINT "AvailableEventDate_eventCommitmentId_fkey" FOREIGN KEY ("eventCommitmentId") REFERENCES "EventCommitment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "EventAvailableDate" ADD CONSTRAINT "EventAvailableDate_eventCommitmentId_fkey" FOREIGN KEY ("eventCommitmentId") REFERENCES "EventCommitment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_rideId_fkey" FOREIGN KEY ("rideId") REFERENCES "Ride"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -200,10 +198,10 @@ ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_rideId_fkey" FOREI
 ALTER TABLE "EventCommitment" ADD CONSTRAINT "EventCommitment_rideRequestId_fkey" FOREIGN KEY ("rideRequestId") REFERENCES "RideRequest"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Ride" ADD CONSTRAINT "Ride_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Ride" ADD CONSTRAINT "Ride_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Ride" ADD CONSTRAINT "Ride_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "Place"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RideRequest" ADD CONSTRAINT "RideRequest_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RideRequest" ADD CONSTRAINT "RideRequest_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
